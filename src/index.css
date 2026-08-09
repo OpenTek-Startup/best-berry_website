@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* --- Palette derivee du logo Best Berry --- */
+  --color-leaf-50: #f1f9ec;
+  --color-leaf-100: #dff0d1;
+  --color-leaf-300: #a9d886;
+  --color-leaf-500: #6fb43f;
+  --color-leaf-600: #4c9a2a;
+  --color-leaf-700: #3b7a20;
+  --color-leaf-900: #244913;
+
+  --color-sun-50: #fff8e6;
+  --color-sun-100: #ffedbf;
+  --color-sun-300: #fbd35f;
+  --color-sun-500: #f0a202;
+  --color-sun-600: #cf8a00;
+  --color-sun-700: #a66d00;
+
+  --color-berry-50: #fdf1f4;
+  --color-berry-100: #fbdce4;
+  --color-berry-300: #ec8ba1;
+  --color-berry-500: #c1244b;
+  --color-berry-600: #a11d3f;
+  --color-berry-700: #7c1731;
+
+  --color-paper: #fffdf7;
+  --color-ink-900: #20301d;
+  --color-ink-700: #3a4a37;
+  --color-ink-500: #64735f;
+
+  --font-display: "Baloo 2", ui-rounded, "Segoe UI", sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink-900);
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-sun-500);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Signature arc motif used as a section divider, echoing the logo's arch */
+.arc-divider {
+  position: relative;
+  overflow: hidden;
+}
+.arc-divider svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
