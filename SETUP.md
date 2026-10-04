@@ -10,9 +10,43 @@ de créer des comptes et de copier-coller des identifiants dans un fichier `.env
 
 1. Aller sur https://cloud.appwrite.io et créer un compte gratuit.
 2. Créer un nouveau projet, par exemple nommé **Best Berry**.
-3. Dans **Settings → Platforms**, ajouter une plateforme **Web** avec comme nom d'hôte
-   votre domaine (ex: `bestberry.cm`) et `localhost` pour les tests.
+3. Dans **Settings → Platforms**, ajouter une plateforme **Web** pour **chaque** domaine
+   depuis lequel le site sera accédé — c'est ce qui autorise Appwrite à répondre aux requêtes
+   venant de ce domaine (sinon erreur *CORS* / "blocked by CORS policy" dans la console du
+   navigateur). Ajouter au minimum :
+   - `localhost` (développement local)
+   - le domaine de déploiement Vercel, ex. `best-berry.vercel.app`
+   - votre nom de domaine final une fois acheté, ex. `bestberry.cm` et `www.bestberry.cm`
+
+   Dans le champ **Hostname**, ne mettre que le nom d'hôte, sans `https://` ni slash final.
+   ⚠️ Les déploiements de prévisualisation Vercel (pour chaque Pull Request) génèrent une URL
+   aléatoire différente à chaque fois ; ils ne fonctionneront pas avec Appwrite tant que cette
+   URL précise n'a pas été ajoutée. Pour les tests, privilégier le domaine de production stable.
 4. Noter le **Project ID** et l'**API Endpoint** (visibles dans Settings) : ils vont dans `.env`.
+
+### Option rapide : provisionnement automatique (recommandé)
+
+Plutôt que de créer à la main la base, les 6 collections, leurs ~40 attributs, leurs
+permissions, l'équipe et les 2 buckets (sections 1.1 à 1.5 ci-dessous), un script fait
+tout cela en une seule commande :
+
+1. Dans la console Appwrite, **Settings → API Keys → Create API Key**, avec les scopes :
+   `databases.read`, `databases.write`, `collections.read`, `collections.write`,
+   `attributes.read`, `attributes.write`, `teams.read`, `teams.write`, `buckets.read`,
+   `buckets.write`.
+2. `cp scripts/.env.setup.example scripts/.env.setup` puis renseigner `APPWRITE_ENDPOINT`,
+   `APPWRITE_PROJECT_ID` et la clé API créée à l'étape précédente.
+3. `npm install && npm run setup:appwrite`
+
+Le script est **idempotent** : le relancer après une exécution partielle (ou après avoir
+ajouté une collection à la main) ne crée pas de doublons, il saute simplement ce qui existe
+déjà. Les sections 1.1 à 1.5 ci-dessous restent utiles pour comprendre ou vérifier
+manuellement ce que le script a mis en place, et pour l'étape 1.4 (comptes utilisateurs),
+qui elle reste manuelle — un compte nominatif ne doit pas être créé par un script générique.
+
+⚠️ `scripts/.env.setup` contient une clé avec des droits d'administration complets sur le
+projet Appwrite : ne jamais la committer (déjà exclue via `.gitignore`), ne jamais la mettre
+dans les variables d'environnement Vercel (elle n'a rien à faire côté frontend).
 
 ### 1.1 Créer la base de données
 
@@ -51,11 +85,35 @@ Pour chaque collection, aller dans l'onglet **Settings → Permissions** :
 
 ### 1.4 Créer l'équipe "backoffice" et les comptes
 
-1. Dans **Auth → Teams**, créer une équipe nommée `backoffice`.
+1. Dans **Auth → Teams**, créer une équipe. **Important** : lors de la création, Appwrite
+   permet de choisir l'ID de l'équipe (pas seulement son nom) — il faut impérativement
+   mettre l'ID exact `backoffice` (tout en minuscules). Le code de l'application et les
+   permissions de toutes les collections (`Role.team('backoffice')`) s'appuient sur cet ID
+   précis, pas sur le nom affiché.
 2. Dans **Auth → Users**, créer un compte pour la direction et un pour le secrétariat
-   (email + mot de passe), puis les ajouter à l'équipe `backoffice`.
+   (email + mot de passe), puis les ajouter à l'équipe `backoffice` (menu **Teams → backoffice
+   → Add member**).
 3. Activer la vérification en deux étapes (2FA) pour ces comptes dans **Auth → Security**
    — fortement recommandé puisque ces comptes ont accès aux dossiers d'inscription.
+4. **Un compte Appwrite qui n'est pas ajouté à l'équipe `backoffice` ne peut pas accéder au
+   backoffice**, même s'il arrive à se connecter : l'application vérifie l'appartenance à
+   cette équipe à chaque chargement (`AuthContext.tsx`) et redirige sinon vers la page de
+   connexion avec un message d'accès refusé.
+
+#### Mot de passe oublié / réinitialisation
+
+Le site propose un vrai parcours "mot de passe oublié" (`/backoffice/mot-de-passe-oublie`)
+qui envoie un email avec un lien de réinitialisation via `account.createRecovery()`. **Pour
+que cet email parte réellement**, il faut qu'un expéditeur soit configuré côté Appwrite :
+
+- Par défaut, Appwrite Cloud utilise son propre service d'envoi, avec une limite quotidienne
+  réduite — suffisant pour démarrer.
+- Pour un usage réel (école avec plusieurs comptes), configurer un SMTP personnalisé dans
+  **Settings → SMTP** du projet Appwrite (ex. avec un compte Gmail, Brevo ou Resend) afin que
+  les emails de réinitialisation arrivent de façon fiable et depuis une adresse reconnaissable
+  (ex. `no-reply@bestberry.cm`).
+- Le lien de réinitialisation pointe par défaut vers l'URL du site en cours d'utilisation ; si
+  besoin de le forcer vers un domaine précis, définir `VITE_SITE_URL` dans `.env`.
 
 ### 1.5 Créer les buckets de stockage
 

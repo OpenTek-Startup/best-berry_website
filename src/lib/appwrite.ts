@@ -1,4 +1,4 @@
-import { Client, Account, Databases, Storage, ID, Query, Permission, Role } from 'appwrite';
+import { Client, Account, Databases, Storage, Teams, ID, Query, Permission, Role } from 'appwrite';
 
 // Tant que le projet Appwrite n'est pas encore configuré (voir SETUP.md),
 // on retombe sur des valeurs par défaut plutôt que de laisser le site planter
@@ -24,7 +24,14 @@ const client = new Client()
 export const account = new Account(client);
 export const databases = new Databases(client);
 export const storage = new Storage(client);
+export const teams = new Teams(client);
 export { ID, Query, Permission, Role };
+
+// ID exact de l'équipe Appwrite donnant accès au backoffice. Doit correspondre
+// à l'ID choisi lors de la création de l'équipe dans la console Appwrite
+// (voir SETUP.md, section 1.4) — c'est aussi cet ID qui est utilisé dans les
+// permissions `Role.team('backoffice')` de toutes les collections.
+export const TEAM_BACKOFFICE_ID = 'backoffice';
 
 export const DB_ID = (import.meta.env.VITE_APPWRITE_DATABASE_ID as string) || 'best_berry_db';
 

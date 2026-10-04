@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/contexts/AuthContext';
-import { LayoutDashboard, FileText, Newspaper, Images, CalendarDays, Users, FileEdit, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Newspaper, Images, CalendarDays, Users, FileEdit, UserCog, LogOut } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
 
 const items = [
@@ -45,8 +45,16 @@ export function BackofficeLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="px-5 py-4 border-t border-leaf-700">
-          <p className="text-xs text-leaf-300 mb-2 truncate">{user?.name || user?.email} {role && `· ${role}`}</p>
+        <div className="px-5 py-4 border-t border-leaf-700 space-y-2">
+          <NavLink
+            to="/backoffice/mon-compte"
+            className={({ isActive }) =>
+              `flex items-center gap-2 text-xs truncate ${isActive ? 'text-white font-semibold' : 'text-leaf-300 hover:text-white'}`
+            }
+          >
+            <UserCog size={14} className="shrink-0" />
+            <span className="truncate">{user?.name || user?.email} {role && `· ${role}`}</span>
+          </NavLink>
           <button onClick={handleLogout} className="flex items-center gap-2 text-sm text-leaf-100 hover:text-white">
             <LogOut size={16} /> {t('backoffice.deconnexion')}
           </button>

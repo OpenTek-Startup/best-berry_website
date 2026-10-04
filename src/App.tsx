@@ -14,6 +14,9 @@ import { Admissions } from '@/pages/public/Admissions';
 import { Contact } from '@/pages/public/Contact';
 
 import { Login } from '@/pages/backoffice/Login';
+import { MotDePasseOublie } from '@/pages/backoffice/MotDePasseOublie';
+import { ReinitialiserMotDePasse } from '@/pages/backoffice/ReinitialiserMotDePasse';
+import { MonCompte } from '@/pages/backoffice/MonCompte';
 import { Dashboard } from '@/pages/backoffice/Dashboard';
 import { Inscriptions } from '@/pages/backoffice/Inscriptions';
 import { GererActualites } from '@/pages/backoffice/GererActualites';
@@ -41,6 +44,8 @@ function App() {
 
           {/* Backoffice */}
           <Route path="/backoffice/connexion" element={<Login />} />
+          <Route path="/backoffice/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+          <Route path="/backoffice/reinitialiser-mot-de-passe" element={<ReinitialiserMotDePasse />} />
           <Route
             path="/backoffice"
             element={
@@ -56,6 +61,7 @@ function App() {
             <Route path="calendrier" element={<GererCalendrier />} />
             <Route path="equipe" element={<GererEquipe />} />
             <Route path="contenu" element={<PagesAdmin />} />
+            <Route path="mon-compte" element={<MonCompte />} />
           </Route>
 
           {/* 404 -> retour à l'accueil */}

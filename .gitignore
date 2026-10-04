@@ -10,6 +10,9 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Clé API Appwrite du script de provisionnement (droits d'administration)
+scripts/.env.setup
+
 # Logs
 *.log
 npm-debug.log*
