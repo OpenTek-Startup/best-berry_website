@@ -4,10 +4,11 @@ import { useNavigate, Navigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 
 export function Login() {
   const { t } = useTranslation();
-  const { login, startMfaChallenge, completeMfaChallenge, logout, user, isAuthorized, loading: authLoading } = useAuth();
+  const { login, logout, user, isAuthorized, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const accesRefuse = searchParams.get('acces_refuse') === '1';
@@ -15,9 +16,6 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Seconde étape (double authentification), affichée après un mot de passe correct
-  const [mfa, setMfa] = useState<{ challengeId: string; factor: 'totp' | 'email' | 'phone' } | null>(null);
-  const [code, setCode] = useState('');
 
   if (!authLoading && user && isAuthorized) return <Navigate to="/backoffice" replace />;
 
@@ -26,29 +24,10 @@ export function Login() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await login(email, password);
-      if (res.mfaRequired) {
-        setMfa(await startMfaChallenge());
-        return;
-      }
+      await login(email, password);
       navigate('/backoffice');
     } catch {
       setError('Email ou mot de passe incorrect.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleCode = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!mfa) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      await completeMfaChallenge(mfa.challengeId, code.trim());
-      navigate('/backoffice');
-    } catch {
-      setError('Code incorrect ou expiré. Réessayez.');
     } finally {
       setSubmitting(false);
     }
@@ -72,30 +51,6 @@ export function Login() {
           </div>
         )}
 
-        {mfa ? (
-          <form onSubmit={handleCode} className="space-y-4">
-            <p className="text-sm text-ink-700">
-              {mfa.factor === 'totp'
-                ? "Entrez le code à 6 chiffres affiché par votre application d'authentification."
-                : mfa.factor === 'email'
-                  ? 'Un code vient de vous être envoyé par email. Entrez-le ci-dessous.'
-                  : 'Un code vient de vous être envoyé par SMS. Entrez-le ci-dessous.'}
-            </p>
-            <input
-              inputMode="numeric" autoComplete="one-time-code" required value={code}
-              onChange={(e) => setCode(e.target.value)} maxLength={6} placeholder="000000"
-              className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 text-center tracking-widest text-lg outline-none focus:ring-2 focus:ring-leaf-200"
-            />
-            {error && <p className="text-berry-600 text-sm font-medium">{error}</p>}
-            <button
-              type="submit" disabled={submitting}
-              className="w-full py-3 rounded-full bg-leaf-600 text-white font-bold hover:bg-leaf-700 disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {submitting && <Loader2 className="animate-spin" size={18} />}
-              Valider le code
-            </button>
-          </form>
-        ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-semibold text-ink-700 mb-1.5">{t('backoffice.email')}</label>
@@ -111,10 +66,7 @@ export function Login() {
                 Mot de passe oublié ?
               </Link>
             </div>
-            <input
-              type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-leaf-200"
-            />
+            <PasswordInput required value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
           {error && <p className="text-berry-600 text-sm font-medium">{error}</p>}
           <button
@@ -125,7 +77,6 @@ export function Login() {
             {t('backoffice.se_connecter')}
           </button>
         </form>
-        )}
 
         {user && !isAuthorized && !authLoading && (
           <button

@@ -93,8 +93,9 @@ Pour chaque collection, aller dans l'onglet **Settings → Permissions** :
 2. Dans **Auth → Users**, créer un compte pour la direction et un pour le secrétariat
    (email + mot de passe), puis les ajouter à l'équipe `backoffice` (menu **Teams → backoffice
    → Add member**).
-3. Activer la vérification en deux étapes (2FA) pour ces comptes dans **Auth → Security**
-   — fortement recommandé puisque ces comptes ont accès aux dossiers d'inscription.
+3. **Ne pas activer la double authentification (MFA/2FA)** sur ces comptes : le site ne gère
+   pas cette étape, et un compte avec MFA activé ne pourrait plus se connecter (erreur
+   `user_more_factors_required`).
 4. **Un compte Appwrite qui n'est pas ajouté à l'équipe `backoffice` ne peut pas accéder au
    backoffice**, même s'il arrive à se connecter : l'application vérifie l'appartenance à
    cette équipe à chaque chargement (`AuthContext.tsx`) et redirige sinon vers la page de

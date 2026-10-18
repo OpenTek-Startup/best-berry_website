@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, CheckCircle2 } from 'lucide-react';
 import logo from '@/assets/logo.jpg';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 
 export function ReinitialiserMotDePasse() {
   const { completePasswordRecovery } = useAuth();
@@ -70,19 +71,11 @@ export function ReinitialiserMotDePasse() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-ink-700 mb-1.5">Nouveau mot de passe</label>
-              <input
-                type="password" required minLength={8} value={motDePasse}
-                onChange={(e) => setMotDePasse(e.target.value)}
-                className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-leaf-200"
-              />
+              <PasswordInput required minLength={8} value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-semibold text-ink-700 mb-1.5">Confirmer le mot de passe</label>
-              <input
-                type="password" required minLength={8} value={confirmation}
-                onChange={(e) => setConfirmation(e.target.value)}
-                className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-leaf-200"
-              />
+              <PasswordInput required minLength={8} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
             </div>
             {erreur && <p className="text-berry-600 text-sm font-medium">{erreur}</p>}
             <button

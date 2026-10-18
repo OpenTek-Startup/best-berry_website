@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { account, teams, TEAM_BACKOFFICE_ID } from '@/lib/appwrite';
-import { AppwriteException, AuthenticationFactor, type Models } from 'appwrite';
+import type { Models } from 'appwrite';
 
 interface AuthContextValue {
   user: Models.User<Models.Preferences> | null;
@@ -10,12 +10,7 @@ interface AuthContextValue {
    * à l'équipe "backoffice". Reste `false` tant que ce n'est pas vérifié,
    * y compris pendant le chargement — ne jamais s'y fier avant `loading === false`. */
   isAuthorized: boolean;
-  /** Retourne `{ mfaRequired: true }` quand le compte a la double authentification
-   * activée : la session est alors partielle et il faut appeler
-   * `startMfaChallenge` puis `completeMfaChallenge`. */
-  login: (email: string, password: string) => Promise<{ mfaRequired: boolean }>;
-  startMfaChallenge: () => Promise<{ challengeId: string; factor: 'totp' | 'email' | 'phone' }>;
-  completeMfaChallenge: (challengeId: string, code: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   requestPasswordRecovery: (email: string) => Promise<void>;
   completePasswordRecovery: (userId: string, secret: string, password: string) => Promise<void>;
@@ -63,41 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      await account.createEmailPasswordSession(email, password);
-    } catch (err) {
-      // Mot de passe correct mais seconde étape (MFA) requise : une session
-      // partielle existe déjà côté Appwrite, on poursuit avec le challenge.
-      if (err instanceof AppwriteException && err.type === 'user_more_factors_required') {
-        return { mfaRequired: true };
-      }
-      throw err;
-    }
-    await refresh();
-    return { mfaRequired: false };
-  };
-
-  const startMfaChallenge = async () => {
-    const factors = await account.listMfaFactors();
-    // On privilégie l'application d'authentification (TOTP), sinon email, sinon SMS.
-    const factor: 'totp' | 'email' | 'phone' | null = factors.totp
-      ? 'totp'
-      : factors.email
-        ? 'email'
-        : factors.phone
-          ? 'phone'
-          : null;
-    if (!factor) throw new Error('Aucun second facteur configuré sur ce compte.');
-    const facteurSdk =
-      factor === 'totp' ? AuthenticationFactor.Totp
-      : factor === 'email' ? AuthenticationFactor.Email
-      : AuthenticationFactor.Phone;
-    const challenge = await account.createMfaChallenge(facteurSdk);
-    return { challengeId: challenge.$id, factor };
-  };
-
-  const completeMfaChallenge = async (challengeId: string, code: string) => {
-    await account.updateMfaChallenge(challengeId, code);
+    await account.createEmailPasswordSession(email, password);
     await refresh();
   };
 
@@ -134,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user, loading, role, isAuthorized,
-        login, startMfaChallenge, completeMfaChallenge, logout, requestPasswordRecovery, completePasswordRecovery, updateOwnPassword,
+        login, logout, requestPasswordRecovery, completePasswordRecovery, updateOwnPassword,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, CheckCircle2, UserRound } from 'lucide-react';
+import { PasswordInput } from '@/components/ui/PasswordInput';
 
 export function MonCompte() {
   const { user, role, updateOwnPassword } = useAuth();
@@ -59,24 +60,15 @@ export function MonCompte() {
         <h2 className="font-display font-bold text-ink-900">Changer de mot de passe</h2>
         <div>
           <label className="block text-sm font-semibold text-ink-700 mb-1.5">Mot de passe actuel</label>
-          <input
-            type="password" required value={motDePasseActuel} onChange={(e) => setMotDePasseActuel(e.target.value)}
-            className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-leaf-200"
-          />
+          <PasswordInput required value={motDePasseActuel} onChange={(e) => setMotDePasseActuel(e.target.value)} />
         </div>
         <div>
           <label className="block text-sm font-semibold text-ink-700 mb-1.5">Nouveau mot de passe</label>
-          <input
-            type="password" required minLength={8} value={nouveauMotDePasse} onChange={(e) => setNouveauMotDePasse(e.target.value)}
-            className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-leaf-200"
-          />
+          <PasswordInput required minLength={8} value={nouveauMotDePasse} onChange={(e) => setNouveauMotDePasse(e.target.value)} />
         </div>
         <div>
           <label className="block text-sm font-semibold text-ink-700 mb-1.5">Confirmer le nouveau mot de passe</label>
-          <input
-            type="password" required minLength={8} value={confirmation} onChange={(e) => setConfirmation(e.target.value)}
-            className="w-full rounded-xl border border-leaf-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-leaf-200"
-          />
+          <PasswordInput required minLength={8} value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
         </div>
 
         {erreur && <p className="text-berry-600 text-sm font-medium">{erreur}</p>}
